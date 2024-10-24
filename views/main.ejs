@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatPlace</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+
+
+
+<body  class="homebody"> 
+
+    <% if(message && message.length ){ %>
+        <div class="alert alert-success  both  alert-dismissible fade show  col-6 offset-3" role="alert">
+            <%= message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+    <%} %>
+
+
+     <div >
+        <div class="top">
+            <img src="/images/chatgpt.png" alt="Error" class="openai">
+            <h5 class="heading"><a href="/chatbot" class="anchor">OPEN AI</a></h5>
+        </div>
+        <div class="btns" >
+            <form  action="/logout" method="get">
+                <button class="btn logout extra gap" >LOGOUT</button>
+            </form>
+        </div>
+
+        <div >
+            <h2  id="head" style="margin-left:10rem;">Model-GPT 3.5 Turbo </h2>
+        </div>
+
+
+        <div class="card " style="width: 20rem;height:22rem;margin-top:2.5rem;" >
+            <div class="card-body" style="color:white ">
+              <img src="/images/chatgpt.png" alt="Error" class="card-title" style="height:2rem;width:2rem;margin-left:7rem;margin-top:1rem;">
+              <h6 class="card-subtitle mb-2 text-body-secondary  " style="margin-top: 0.5rem;margin-left:2rem;color:white !important">You are talking to a ChatBOT</h6>
+              <p class="card-text" style="margin-top:2rem"> You can ask some questions related to Knowledge,Business,Advices,Education..But aviod sharing personal information.</p>
+              <form class="btn-form">
+                <button class="btn btn-primary" id="clear" >CLEAR CONVERSATION</button>
+              </form>
+            </div>
+          </div>
+
+        
+       
+        <div id="chatContainer" ></div>
+
+
+
+            <div>
+                <input class="search" type="text" name="search" id="prompt" />
+                <a class="send-icon" id="submit"></a>  
+            </div>
+
+            <script>
+                let btn = document.getElementById("submit");
+                let userData = <%- JSON.stringify(user) %>; // Assuming `user` contains the email
+                let userPrompt = document.getElementById("prompt");
+                let userPara=document.getElementById("userPara");
+                let dataPara=document.getElementById("dataPara");
+                let chatContainer = document.getElementById("chatContainer");
+                let clearBtn=document.getElementById("clear");
+            
+                btn.addEventListener("click", async (event) => {
+                    event.preventDefault();
+                    let message = userPrompt.value; 
+                    let email = userData.email;             
+                    if (!message) {
+                        alert("Please enter a valid prompt");
+                        return;
+                    }  
+                    
+                    // chatContainer.innerText+=message;
+                    chatContainer.innerHTML += `<div class="  user-message"> <i class="fa-solid fa-user  "></i> &nbsp; ${message}</div>`;
+                    try {
+                        let response = await fetch("/chatbot/data", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ email, message }),  
+                        });
+            
+                        const data = await response.json();
+                        if (response.ok) {
+                            // userPara.innerText+=message; 
+                            // chatContainer.innerHTML+=`<img src="/images/chatgpt.png" alt="Error" class="card-title" style="height:1.8rem;width:2rem;margin-left:0.1rem;margin-top:0rem;"> ${data.response}`;
+                            chatContainer.innerHTML += `<div class="  bot-message"> <img src="/images/chatgpt.png" alt="Error" class="card-title" style="height:1.8rem;width:2rem;margin-left:-0.5rem;margin-top:0rem;"> &nbsp;  ${data.response}</div>`;
+                            userPrompt.value="";
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        } else {
+                            console.error("Error:", data);
+                        }
+                    } catch (err) {
+                        console.log(err);
+                    }
+                    
+                });
+
+                clearBtn.addEventListener("click",(event)=>{
+                    event.preventDefault();
+                    chatContainer.innerHTML=``;
+                })
+            </script>
+
+        </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+        
+</body>
+</html>
